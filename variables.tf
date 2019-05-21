@@ -10,12 +10,14 @@ variable "keyname" {
   type = "map"
   default = {
    "us-east-1" = "9068kuftyrau"
-   "us-east-2" = "9068kuftyrau-ohio"
-   # "us-east-2" = "kuftyrau-home"
+   # "us-east-2" = "9068kuftyrau-ohio"
+   "us-east-2" = "kuftyrau-home"
 
   }
 }
-
+variable "vpc_cidr" {
+  default = "10.0.0.0/16"
+}
 variable "azs_ue2" {
   default = ["us-east-2a", "us-east-2b", "us-east-2c"]
 }
