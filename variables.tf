@@ -6,7 +6,8 @@ variable "keyname" {
   type = "map"
   default = {
    "us-east-1" = "9068kuftyrau"
-   "us-east-2" = "9068kuftyrau-ohio"
+   # "us-east-2" = "9068kuftyrau-ohio"
+   "us-east-2" = "kuftyrau-home"
 
   }
 }
