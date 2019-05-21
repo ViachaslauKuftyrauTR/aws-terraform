@@ -1,3 +1,7 @@
+variable "region" {
+  default = "us-east-2"
+}
+
 variable "instance_count" {
   default = 2
 }
@@ -6,14 +10,22 @@ variable "keyname" {
   type = "map"
   default = {
    "us-east-1" = "9068kuftyrau"
-   # "us-east-2" = "9068kuftyrau-ohio"
-   "us-east-2" = "kuftyrau-home"
+   "us-east-2" = "9068kuftyrau-ohio"
+   # "us-east-2" = "kuftyrau-home"
 
   }
 }
 
-variable "region" {
-  default = "us-east-2"
+variable "azs_ue2" {
+  default = ["us-east-2a", "us-east-2b", "us-east-2c"]
+}
+variable "azs_ue1" {
+  default =  ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1e"]
+}
+
+
+variable "ssh_username"{
+  default = "ubuntu"
 }
 
 variable "amis" {
