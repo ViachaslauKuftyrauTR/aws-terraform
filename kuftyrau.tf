@@ -42,7 +42,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "default" {
   vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.1.0/24"
+  cidr_block              = "172.31.1.0/24"
   map_public_ip_on_launch = true
 }
 
@@ -60,7 +60,7 @@ resource "aws_security_group" "nodes" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["${aws_vpc.main.cidr_block}"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -91,27 +91,29 @@ resource "aws_instance" "kuftyrau_instance" {
   ami           = "${lookup(var.amis, var.region)}"
   instance_type = "t2.micro"
   key_name      = "${lookup(var.keyname, var.region)}"
-  availability_zone      = "${var.region == "us-east-1" ? element(var.azs_ue1, count.index) : element(var.azs_ue2, count.index)}"
-  # vpc_security_group_ids = ["${aws_security_group.nodes.id}"]
-  # subnet_id = "${aws_subnet.default.id}"
-
+  # availability_zone      = "${var.region == "us-east-1" ? element(var.azs_ue1, count.index) : element(var.azs_ue2, count.index)}"
+ 
+  vpc_security_group_ids = ["${aws_security_group.nodes.id}"]
+  subnet_id     = "${aws_subnet.default.id}"
 connection {
   user        = "${var.ssh_username}"
-  # private_key ="${file("/mnt/d/9068kuftyrau-ohio.pem")}"
-  private_key ="${file("/home/vkuftyrau/Downloads/kuftyrau-home.pem")}"
+  private_key ="${file("/mnt/d/9068kuftyrau-ohio.pem")}"
+  # private_key ="${file("/home/vkuftyrau/Downloads/kuftyrau-home.pem")}"
   agent       = true
   timeout     = "3m"
 }
 
-  provisioner "remote-exec" {
-    inline = [
-      "export PATH=$PATH:/usr/bin",
-      "sudo apt update -y",
-      "sudo apt install -y nginx",
-      "sudo su -c 'echo $HOSTNAME > /var/www/html/index.html'",
-      "sudo systemctl start nginx && sudo systemctl enable nginx"
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "export PATH=$PATH:/usr/bin",
+  #     "sudo apt update -y",
+  #     "sudo apt install -y nginx",
+  #     "sudo su -c 'echo $HOSTNAME > /var/www/html/index.html'",
+  #     "sudo service nginx start && sudo systemctl enable nginx"
+  #   ]
+  # }
+
+
 
   tags {
     name = "Node-${count.index}"
@@ -121,9 +123,11 @@ connection {
 
 resource "aws_elb" "kuftyrau_elb" {
   name               = "kuftyrau-elb"
+
   availability_zones = ["us-east-2a", "us-east-2b", "us-east-2c"]
+
   depends_on         = ["aws_s3_bucket.kuftyrau_bucket"]
-  # security_groups    = ["${aws_security_group.lb.id}"]
+  security_groups    = ["${aws_security_group.lb.id}"]
 
   access_logs {
     bucket    = "${aws_s3_bucket.kuftyrau_bucket.bucket}"
