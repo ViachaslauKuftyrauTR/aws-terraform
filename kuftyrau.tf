@@ -44,7 +44,6 @@ resource "aws_internet_gateway" "gw" {
 
 resource "aws_default_route_table" "r" {
   default_route_table_id = "${aws_vpc.main.default_route_table_id}"
-  depends_on      = ["aws_vpc.main"]
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = "${aws_internet_gateway.gw.id}"
@@ -176,13 +175,13 @@ resource "aws_launch_configuration" "nginx" {
   image_id = "${lookup(var.amis, var.region)}"
   instance_type = "t2.micro"
   security_groups = ["${aws_security_group.nodes.id}"]
-  user_data = <<-EOF
-    #!/bin/bash
-    sudo apt update -y
-    sudo apt install -y nginx
-    sudo su -c 'echo $HOSTNAME > /var/www/html/index.html'
-    sudo service nginx start && sudo systemctl enable nginx
-    EOF
+  # user_data = <<-EOF
+  #   #!/bin/bash
+  #   sudo apt update -y
+  #   sudo apt install -y nginx
+  #   sudo su -c 'echo $HOSTNAME > /var/www/html/index.html'
+  #   sudo service nginx start && sudo systemctl enable nginx
+  #   EOF
 
   lifecycle {
     create_before_destroy = true
@@ -191,11 +190,16 @@ resource "aws_launch_configuration" "nginx" {
 
 resource "aws_autoscaling_group" "nodes" {
   launch_configuration = "${aws_launch_configuration.nginx.id}"
-  availability_zones = ["${data.aws_availability_zones.all.names}"]
+  availability_zones = ["${aws_instance.kuftyrau_instance.0.availability_zone}"]
+  # availability_zones = ["${data.aws_availability_zones.all.names}"]
   min_size = "${var.instance_count}"
   max_size = "${var.instance_count + 5}"
   load_balancers = ["${aws_elb.kuftyrau_elb.name}"]
   health_check_type = "ELB"
+
+  ###
+  # add network
+  ###
 }
 
 
