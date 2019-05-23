@@ -3,7 +3,7 @@ variable "region" {
 }
 
 variable "vpc_cidr" {
-  default = "172.31.0.0/16"
+  default = "172.60.0.0/16"
 }
 
 variable "instance_count" {
@@ -14,8 +14,8 @@ variable "keyname" {
   type = "map"
   default = {
    "us-east-1" = "9068kuftyrau"
-   "us-east-2" = "9068kuftyrau-ohio"
-   # "us-east-2" = "kuftyrau-home"
+   # "us-east-2" = "9068kuftyrau-ohio"
+   "us-east-2" = "kuftyrau-home"
 
   }
 }
