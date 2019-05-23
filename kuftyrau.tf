@@ -46,7 +46,22 @@ resource "aws_vpc" "main" {
   }
 }
 
+resource "aws_network_acl" "main" {
+  vpc_id = "${aws_vpc.main.id}"
 
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 80
+    to_port    = 80
+  }
+
+  tags = {
+    Name = "main"
+  }
+}
 
 resource "aws_default_route_table" "r" {
   default_route_table_id = "${aws_vpc.main.default_route_table_id}"
@@ -81,7 +96,7 @@ resource "aws_security_group" "nodes" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${aws_subnet.default.cidr_block}"]
   }
   egress {
     from_port       = 0
@@ -93,10 +108,16 @@ resource "aws_security_group" "nodes" {
 
 
 resource "aws_security_group" "lb" {
-  name        = "lb-nodes"
-  description = "Used  LB"
+  name        = "lb"
+  description = "Used for ELB"
   vpc_id      = "${aws_vpc.main.id}"
 
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   ingress{
     from_port   = 80
     to_port     = 80
@@ -124,8 +145,8 @@ resource "aws_instance" "kuftyrau_instance" {
   subnet_id     = "${aws_subnet.default.id}"
 connection {
   user        = "${var.ssh_username}"
-  # private_key ="${file("/mnt/d/9068kuftyrau-ohio.pem")}"
-  private_key ="${file("/home/vkuftyrau/Downloads/kuftyrau-home.pem")}"
+  private_key ="${file("/mnt/d/9068kuftyrau-ohio.pem")}"
+  # private_key ="${file("/home/vkuftyrau/Downloads/kuftyrau-home.pem")}"
   agent       = true
   timeout     = "3m"
 }
@@ -152,9 +173,9 @@ resource "aws_elb" "kuftyrau_elb" {
   name               = "kuftyrau-elb"
 
   # availability_zones = ["us-east-2a", "us-east-2b", "us-east-2c"]
-  subnets     = ["${aws_subnet.default.id}"]
-  depends_on         = ["aws_s3_bucket.kuftyrau_bucket"]
-  security_groups    = ["${aws_security_group.lb.id}",]
+  subnets         = ["${aws_subnet.default.id}"]
+  depends_on      = ["aws_s3_bucket.kuftyrau_bucket"]
+  security_groups = ["${aws_security_group.lb.id}",]
 
   access_logs {
     bucket    = "${aws_s3_bucket.kuftyrau_bucket.bucket}"
