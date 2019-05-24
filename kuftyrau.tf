@@ -38,22 +38,19 @@ module "subnet" {
 }
 
 module "security_groups" {
-  source = "./modules/security_groups"
-  vpc_id = "${module.vpc.this_vpc_id}"
+  source     = "./modules/security_groups"
+  vpc_id     = "${module.vpc.this_vpc_id}"
   cidr_block = "${module.subnet.this_cidr_block}"
 }
 
 
 module "instance" {
-  source = "./modules/instance"
-  subnet_id = "${module.subnet.this_subnet_id}"
+  source            = "./modules/instance"
+  subnet_id         = "${module.subnet.this_subnet_id}"
   security_group_id = "${module.security_groups.this_sg_nodes_id}"
 }
 
-# module "autoscaling" {
-#   source = "./modules/autoscaling"
 
-# }
 
 module "bucket" {
   source = "./modules/bucket"
@@ -68,4 +65,14 @@ module "elb" {
   instance_id = "${module.instance.this_instance_id}"
 }
 
+module "autoscaling" {
+  source             = "./modules/autoscaling"
+  ami                = "${module.instance.this_ami}"
+  security_group_id  = "${module.security_groups.this_sg_nodes_id}"
+  az                 = "${module.instance.this_az}"
+  min_instance_count = 2
+  max_instance_count = 3
+  elb_name           = "${module.elb.this_name}"
+  subnet_id          = "${module.subnet.this_subnet_id}"
 
+}

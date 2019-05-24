@@ -1,7 +1,7 @@
 resource "aws_elb" "kuftyrau_elb" {
   name               = "kuftyrau-elb"
 
-  # availability_zones = ["us-east-2a", "us-east-2b", "us-east-2c"]
+  
   subnets         = ["${var.subnet_id}"]
   security_groups = ["${var.security_group_id}",]
   instances = ["${var.instance_id}"]

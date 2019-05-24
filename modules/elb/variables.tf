@@ -14,6 +14,6 @@ variable "bucket" {
 }
 
 variable "instance_id" {
-  type = "string"
+  type = "list"
 
 }

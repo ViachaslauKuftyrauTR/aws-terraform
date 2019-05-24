@@ -38,5 +38,6 @@ variable "amis" {
 
 variable "security_group_id" {
   type = "string"
-  description = "describe your variable"
+
 }
+
