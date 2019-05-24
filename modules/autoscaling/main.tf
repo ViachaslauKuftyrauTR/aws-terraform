@@ -3,12 +3,12 @@ resource "aws_launch_configuration" "nginx" {
   instance_type = "t2.micro"
   security_groups = ["${var.security_group_id}"]
   user_data = <<EOF
-  #!/bin/bash
-  echo "start" > /home/ubuntu/start
-  sudo apt-get update -y
-  sudo apt-get install -y nginx
-  sudo su -c 'echo $HOSTNAME > /var/www/html/index.html'
-  sudo su -c 'echo autoscaled >> /var/www/html/index.html'
+#!/bin/bash
+echo "start" > /home/ubuntu/start
+sudo apt-get update -y
+sudo apt-get install -y nginx
+sudo su -c 'echo $HOSTNAME > /var/www/html/index.html'
+sudo su -c 'echo autoscaled `date` >> /var/www/html/index.html'
   EOF
   lifecycle {
     create_before_destroy = true
